@@ -3,7 +3,7 @@
 A high-fidelity, skeuomorphic web-based cassette deck simulator that bridges vintage analog aesthetics with modern digital audio playback.
 
 ## 🔗 Live Demo
-[**Launch the Cassette Deck**](https://technics-deck-babuptx.netlify.app)
+[**Launch the Cassette Deck**](https://technics-deck-babuptx.netlify.app/)
 *(Note: If your Netlify URL is different, please edit this link)*
 
 ## 🌟 Features
