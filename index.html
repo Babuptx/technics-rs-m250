@@ -3,21 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Technics RS-M250 Hybrid (V3.58 - Spaced Reels)</title>
+<title>Technics RS-M250 Hybrid (V5.7 - Readable Clock)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+
 <style>
     /* --- VARIABLES --- */
     :root {
         /* WOOD & SILVER THEME */
         --wood-texture: repeating-linear-gradient(90deg, #5c4033, #8b5a2b 2px, #5c4033 6px);
-        --wood-border: #3e2723;
         
         /* BRUSHED NICKEL FACE */
         --brushed-nickel: 
             linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(0,0,0,0.1) 100%),
             repeating-linear-gradient(90deg, #b0b0b0 0px, #dcdcdc 1px, #b0b0b0 2px);
             
-        --chrome-gradient: linear-gradient(135deg, #fff 0%, #999 50%, #fff 100%);
-        
         /* VU METER */
         --meter-bg: #181008; 
         --meter-markings: #e0c0a0; 
@@ -26,18 +27,25 @@
         --meter-amber-glow: radial-gradient(circle at 50% 90%, rgba(255, 140, 0, 0.6) 0%, rgba(255, 100, 0, 0.2) 50%, transparent 100%);
         
         /* POWER */
-        --power-off: #333; /* High contrast dark grey for icon when off */
+        --power-off: #333; 
         --power-on-neon: #00ffff;
         
-        /* LEDS */
-        --led-off: #333; 
+        /* LEDS & VFD */
+        --led-off: #1a1a1a; 
         --led-white-on: #00e6cc; 
         --led-red-on: #ff0000;
         --vfd-green: #00ff41;
+        --vfd-amber: #ffaa00; 
         
         /* BUTTON LEDS */
-        --play-led-color: #00ff00;
+        --btn-led-off: #3a3a3a;
+        --btn-led-green: #00ff00;
+        --btn-led-amber: #ffaa00;
         --selector-led-on: #00ffff;
+        
+        /* COUNTER LED */
+        --counter-led-pale: #003333;
+        --counter-led-active: #00ffff;
         
         /* TAPE TYPES */
         --tape-gold: linear-gradient(to bottom, #cfb568 0%, #e6d395 40%, #b89745 100%);
@@ -47,9 +55,10 @@
         
         /* CASSETTE */
         --cassette-body: #1a1a1a;
-        --tape-metal: #252525;
         
         --ui-font: 'Arial', sans-serif;
+        --digital-font: 'Share Tech Mono', monospace;
+        --manual-font: 'Roboto Mono', monospace;
     }
 
     body {
@@ -98,13 +107,100 @@
     .wood-case::before { content:''; position:absolute; top:0; left:0; width:15px; height:100%; background:rgba(0,0,0,0.2); }
     .wood-case::after { content:''; position:absolute; top:0; right:0; width:15px; height:100%; background:rgba(0,0,0,0.2); }
 
+    /* SYSTEM CLOCK (High Contrast Window) */
+    .system-clock {
+        position: absolute;
+        top: 20px;
+        right: 40px;
+        font-family: var(--digital-font);
+        font-size: 14px;
+        color: #00ffff; /* Bright Cyan */
+        background-color: #111; /* Dark Background for readability */
+        padding: 6px 12px;
+        border: 2px solid #555;
+        border-radius: 4px;
+        box-shadow: inset 0 0 5px #000, 0 1px 2px rgba(255,255,255,0.5);
+        text-shadow: 0 0 5px rgba(0, 255, 255, 0.6);
+        z-index: 100;
+        letter-spacing: 1px;
+    }
+
+    /* HELP ICON */
+    .help-icon {
+        width: 32px;
+        height: 32px;
+        background: radial-gradient(circle at 30% 30%, #ffd700, #b8860b);
+        border: 2px solid #fff;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        transition: transform 0.2s;
+        margin-left: 15px; 
+        margin-bottom: 20px; 
+    }
+    .help-icon:hover { transform: scale(1.1); }
+    .help-icon svg { width: 18px; height: 18px; fill: #3e2723; }
+
+    /* MODAL WINDOW */
+    .modal-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.85);
+        z-index: 1000;
+        display: none; 
+        justify-content: center; align-items: center;
+        opacity: 0; transition: opacity 0.3s ease;
+    }
+    .modal-overlay.show { display: flex; opacity: 1; }
+
+    .modal-content {
+        width: 600px; max-height: 80vh;
+        background: #f0f0f0;
+        border: 4px solid #333;
+        border-radius: 4px;
+        box-shadow: 0 0 50px rgba(0, 255, 255, 0.2);
+        display: flex; flex-direction: column;
+        overflow: hidden;
+        font-family: var(--manual-font);
+        color: #222;
+        user-select: text; 
+        cursor: auto;
+    }
+
+    .modal-header {
+        background: #333; color: #fff;
+        padding: 15px 20px;
+        display: flex; justify-content: space-between; align-items: center;
+        border-bottom: 2px solid #00ffff;
+        user-select: none; 
+    }
+    .modal-title { font-weight: bold; font-size: 18px; letter-spacing: 1px; }
+    .close-btn { cursor: pointer; font-size: 24px; font-weight: bold; color: #ccc; transition: color 0.2s; }
+    .close-btn:hover { color: #fff; }
+
+    .modal-body {
+        padding: 25px;
+        overflow-y: auto;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+    .modal-body h3 { border-bottom: 2px solid #ccc; padding-bottom: 5px; margin-top: 20px; color: #000; }
+    .modal-body h3:first-child { margin-top: 0; }
+    .modal-body ul { padding-left: 20px; }
+    .modal-body li { margin-bottom: 5px; }
+    .contact-highlight {
+        background: #e0e0e0; padding: 15px; margin-top: 20px; border-left: 4px solid #00ffff; font-weight: bold;
+    }
+
     .foot { position: absolute; bottom: -15px; width: 60px; height: 20px; background: linear-gradient(to right, #333, #999, #333); border-radius: 0 0 10px 10px; box-shadow: 0 5px 10px rgba(0,0,0,0.8); }
     .foot.left { left: 40px; } .foot.right { right: 40px; }
 
     /* --- FACEPLATE --- */
     .deck-body {
         width: 1500px; 
-        height: 650px;
+        height: 720px; 
         background: var(--brushed-nickel);
         border: 1px solid #999;
         border-top: 1px solid #eee;
@@ -120,24 +216,74 @@
     .logo { font-family: 'Helvetica', sans-serif; font-weight: 900; font-size: 32px; text-transform: uppercase; color: #111; letter-spacing: -1px; text-shadow: 0 1px 0 rgba(255,255,255,0.5); }
     .model { font-size: 12px; font-weight: bold; color: #555; letter-spacing: 2px; margin-top: 2px; font-family: 'Brush Script MT', cursive; font-style: italic;}
 
-    /* COUNTER & TIME DISPLAY */
+    /* === VINTAGE DIGITAL COUNTER === */
     .counter-wrapper { 
-        position: absolute; top: 35px; right: 520px; 
-        display: flex; align-items: center; gap: 15px; 
-        background: #222; padding: 5px 15px; 
-        border: 2px solid #555; border-radius: 2px; 
-        box-shadow: inset 0 0 5px #000, 0 1px 0 #fff; z-index: 20;
+        position: absolute; top: 35px; right: 480px; 
+        display: flex; align-items: flex-end; gap: 25px; 
+        background: #181818; 
+        padding: 8px 25px; 
+        border: 2px solid #666; 
+        border-bottom: 2px solid #444;
+        border-radius: 4px; 
+        box-shadow: inset 0 0 15px #000, 0 2px 4px rgba(0,0,0,0.4); 
+        z-index: 20;
     }
-    .counter-group { display: flex; align-items: center; gap: 5px; }
-    .counter-label { font-size: 9px; color: #888; font-weight: bold; }
-    .counter-digits { font-family: 'Courier New', monospace; font-size: 20px; color: var(--vfd-green); letter-spacing: 2px; font-weight: bold; text-shadow: 0 0 5px var(--vfd-green); }
-    .reset-button { width: 8px; height: 8px; background: #888; border-radius: 50%; cursor: pointer; border: 1px solid #aaa; }
+
+    .counter-group { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
     
-    .time-digits { 
-        font-family: 'Consolas', monospace; font-size: 14px; 
-        color: #ffaa00; font-weight: bold; letter-spacing: 1px;
-        text-shadow: 0 0 3px #ffaa00; 
-        border-left: 1px solid #444; padding-left: 10px;
+    .counter-activity-led {
+        width: 14px; 
+        height: 5px; 
+        background: var(--counter-led-pale); 
+        border-radius: 1px; 
+        box-shadow: inset 0 0 2px #000; 
+        transition: all 0.1s;
+        margin-right: 2px;
+    }
+    .deck-body.powered-on .counter-activity-led.active {
+        background: var(--counter-led-active);
+        box-shadow: 0 0 8px var(--counter-led-active);
+    }
+    
+    .counter-window {
+        background: #000;
+        padding: 4px 10px;
+        border-radius: 2px;
+        box-shadow: inset 0 0 5px rgba(0,0,0,0.8);
+        border: 1px solid #333;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .counter-digits, .time-digits { 
+        font-family: var(--digital-font);
+        font-size: 32px; 
+        color: #444; 
+        letter-spacing: 2px; 
+        line-height: 1;
+        text-shadow: none;
+        transition: color 0.2s, text-shadow 0.2s;
+        white-space: nowrap;
+    }
+
+    .deck-body.powered-on .counter-digits,
+    .deck-body.powered-on .time-digits {
+        color: #ffffff;
+        text-shadow: 0 0 1px rgba(255,255,255,0.8), 0 0 4px rgba(255,255,255,0.4);
+    }
+    
+    .reset-button { 
+        width: 12px; height: 12px; background: #999; border-radius: 50%; cursor: pointer; 
+        border: 1px solid #ccc; box-shadow: 0 2px 2px rgba(0,0,0,0.5);
+    }
+    .reset-button:active { transform: scale(0.9); background: #777; }
+
+    .time-group { 
+        display: flex; flex-direction: column; justify-content: flex-end;
+        border-left: 2px solid #333; padding-left: 20px; 
+        height: 100%;
+        padding-bottom: 4px; 
     }
 
     /* Screws */
@@ -147,11 +293,23 @@
     .screw.bl { bottom: 10px; left: 10px; } .screw.br { bottom: 10px; right: 10px; }
 
     /* TOP PANEL */
-    .top-panel { display: flex; justify-content: space-between; align-items: flex-start; margin-top: 60px; height: 260px; }
-    .readout-panel { flex: 1; margin-right: 40px; display: flex; flex-direction: column; position: relative; }
+    .top-panel { 
+        display: flex; justify-content: space-between; align-items: flex-start; 
+        margin-top: 60px; 
+        height: 330px; 
+    }
+    .readout-panel { flex: 1; margin-right: 40px; display: flex; flex-direction: column; position: relative; gap: 10px; }
+
+    /* WRAPPER FOR TOGGLE + DISPLAY */
+    .display-row-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        width: 100%;
+    }
 
     /* === VU METERS === */
-    .vu-group { display: flex; gap: 20px; width: 100%; height: 150px; align-items: center; margin-bottom: 10px; margin-top: 10px; }
+    .vu-group { display: flex; gap: 20px; width: 100%; height: 150px; align-items: center; }
     .vu-meter { 
         flex: 1; height: 100%; background: var(--meter-bg); 
         border: 4px solid #ccc; border-radius: 2px; 
@@ -192,8 +350,13 @@
     .vu-needle::after { content:''; position:absolute; bottom:-4px; left:-3px; width:8px; height:8px; border-radius:50%; background:#222; border:1px solid #555; }
     .vu-label-text { position: absolute; bottom: 5px; width: 100%; text-align: center; color: var(--meter-markings); font-size: 10px; font-weight: 900; letter-spacing: 1px; text-shadow: 0 0 2px #000; }
 
-    /* VFD (COSY STEREO) */
-    .vfd-container { display: flex; flex-direction: column; gap: 25px; width: 100%; padding: 10px 20px; background: #111; border-radius: 2px; border: 1px solid #555; box-shadow: inset 0 0 10px #000; box-sizing: border-box; }
+    /* VFD (COSY STEREO) - CLICKABLE */
+    .vfd-container { 
+        display: flex; flex-direction: column; gap: 20px; width: 100%; padding: 10px 20px; 
+        background: #111; border-radius: 2px; border: 1px solid #555; 
+        box-shadow: inset 0 0 10px #000; box-sizing: border-box; 
+        cursor: pointer; transition: opacity 0.2s;
+    }
     .channel-row { display: flex; align-items: center; gap: 10px; }
     .ch-label { color: #888; font-size: 10px; font-weight: bold; font-family: sans-serif; width: 12px; }
     .deck-body.powered-on .ch-label { color: #fff; }
@@ -201,6 +364,101 @@
     .led { flex: 1; height: 5px; background-color: var(--led-off); opacity: 0.3; }
     .deck-body.powered-on .led.white-zone.lit { background-color: var(--led-white-on); opacity: 1; box-shadow: 0 0 4px var(--led-white-on); }
     .deck-body.powered-on .led.red-zone.lit { background-color: var(--led-red-on); opacity: 1; box-shadow: 0 0 5px var(--led-red-on); }
+
+    /* DISPLAY OFF STATE FOR LED BARS: ALL LIGHTS OFF */
+    .vfd-container.display-off .led { 
+        background-color: #1a1a1a !important; 
+        box-shadow: none !important; 
+        opacity: 0.2 !important; 
+    }
+
+    /* --- 25-BAND SOLID FILL SPECTRUM ANALYZER (V5.6) - CLICKABLE --- */
+    .spectrum-container {
+        display: flex; 
+        gap: 2px; 
+        width: 100%; 
+        height: 95px; /* Increased Height for Labels */
+        padding: 8px 15px 4px 15px; 
+        background: #000;
+        border-radius: 2px; border: 1px solid #555; 
+        box-shadow: inset 0 0 15px rgba(0,0,0,0.9); 
+        box-sizing: border-box; 
+        align-items: flex-end; 
+        justify-content: space-between;
+        cursor: pointer;
+        position: relative;
+    }
+    
+    /* COL HOLDER: LABEL BOTTOM, BAR TOP */
+    .spec-col { 
+        flex: 1; 
+        height: 100%; 
+        display: block; /* Using Absolute positioning for children */
+        position: relative;
+    }
+    
+    /* FREQUENCY LABEL (INSIDE BOTTOM) */
+    .spec-label {
+        font-family: 'Arial Narrow', sans-serif;
+        font-size: 11px; 
+        color: #444; /* Dim when off */
+        width: 100%;
+        text-align: center;
+        font-weight: 900;
+        position: absolute;
+        bottom: 2px;
+        left: 0;
+        z-index: 20; /* Above bar */
+        pointer-events: none;
+    }
+    .deck-body.powered-on .spec-label { 
+        color: #fff; 
+        text-shadow: 0 0 2px #000, 0 0 2px #000; 
+    }
+
+    /* SINGLE SOLID BAR PER COLUMN - PALE FADE (V5.6) */
+    .spec-bar { 
+        width: 100%; 
+        height: 0%; /* Dynamic Height */
+        /* GRADIENT: ALICE BLUE (#f0f8ff) to SOFT SKY BLUE (#80d8ff) */
+        background: linear-gradient(to top, #f0f8ff 0%, #80d8ff 100%);
+        box-shadow: none; 
+        transition: height 0.05s linear;
+        opacity: 0.2; /* Dim when off */
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        z-index: 10;
+    }
+    
+    .deck-body.powered-on .spec-bar {
+        opacity: 0.85; 
+        box-shadow: 0 0 4px rgba(128, 216, 255, 0.4); 
+    }
+
+    /* PEAK TILE (FALLING DOT) */
+    .peak-tile {
+        position: absolute;
+        width: 100%;
+        height: 2px;
+        background-color: #80d8ff; /* Match Top of Bar */
+        bottom: 0px; 
+        z-index: 15;
+        opacity: 0; 
+        pointer-events: none;
+        box-shadow: 0 0 2px #80d8ff;
+    }
+    .deck-body.powered-on .peak-tile { opacity: 1; }
+
+    /* DISPLAY OFF STATE FOR SPECTRUM */
+    .spectrum-container.display-off .spec-bar {
+        height: 0% !important;
+        box-shadow: none !important;
+        opacity: 0 !important;
+    }
+    .spectrum-container.display-off .peak-tile {
+        opacity: 0 !important;
+    }
 
     /* CASSETTE DOOR - WIDER */
     .door-frame { 
@@ -241,7 +499,7 @@
     /* WIDER RACETRACK WINDOW & SPREAD REELS */
     .tape-window-glass {
         position: absolute; 
-        width: 290px; /* INCREASED TO SPREAD REELS */
+        width: 350px; 
         height: 95px; 
         top: 50%; left: 50%; transform: translate(-50%, -40%);
         background: transparent; 
@@ -295,18 +553,58 @@
     .fforwarding .reel-hub, .fforwarding .tape-supply { animation: spin 0.2s linear infinite; }
     @keyframes spin { 100% { transform: rotate(360deg); } }
 
-    /* CONTROLS */
+    /* CONTROLS AREA */
     .control-deck { display: flex; justify-content: space-between; align-items: flex-end; margin-top: auto; padding-bottom: 40px; }
-    .piano-keys { display: flex; gap: 8px; background: #2a2a2a; padding: 15px 20px; border-radius: 4px; border: 1px solid #666; box-shadow: inset 0 2px 10px #000; margin-left: 20px; }
-    .key { width: 45px; height: 80px; background: linear-gradient(180deg, #e0e0e0 0%, #bfbfbf 10%, #999 50%, #777 51%, #ccc 100%); border-radius: 2px 2px 4px 4px; position: relative; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.8); border-top: 1px solid #fff; border-bottom: 1px solid #444; transition: all 0.1s; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 6px; }
-    .key:active, .key.pressed { transform: translateY(3px); box-shadow: 0 1px 2px rgba(0,0,0,0.8); background: linear-gradient(180deg, #ccc 0%, #999 50%, #666 51%, #999 100%); height: 77px; }
-    .key#btnPlay.led-active { background: radial-gradient(circle at 50% 80%, #ccffcc 0%, #00cc00 100%) !important; box-shadow: 0 0 15px var(--play-led-color), inset 0 0 5px #fff !important; border-color: #008800; }
-    .key#btnPlay.led-active .key-symbol { color: #004400; text-shadow: 0 0 2px #fff; }
-    .key-rec.pressed { background: radial-gradient(circle at 50% 80%, #ffcccc 0%, #cc0000 100%) !important; box-shadow: 0 0 15px var(--led-red-on), inset 0 0 5px #fff !important; border-color: #880000; }
-    .key-rec .key-symbol { color: #500; }
-    .key#btnPause.pressed { background: radial-gradient(circle at 50% 80%, #ffeebb 0%, #ffaa00 100%) !important; box-shadow: 0 0 15px #ffaa00, inset 0 0 5px #fff !important; border-color: #885500; }
-    .key-label { font-size: 9px; font-weight: 800; color: #222; margin-top: 4px; white-space:nowrap; text-shadow: 0 1px 0 rgba(255,255,255,0.5); }
-    .key-symbol { font-size: 15px; font-weight: bold; color: #111; margin-bottom: 2px; }
+    
+    .button-strip { 
+        display: flex; gap: 10px; background: #222; padding: 12px 18px; 
+        border-radius: 4px; border: 1px solid #444; 
+        box-shadow: inset 0 2px 5px #000; margin-left: 20px; 
+    }
+
+    .key { 
+        width: 64px; 
+        height: 55px; 
+        background: linear-gradient(180deg, #e0e0e0 0%, #c0c0c0 100%); 
+        border: 1px solid #777; border-top: 1px solid #eee;
+        border-radius: 3px; position: relative; cursor: pointer; 
+        box-shadow: 0 3px 5px rgba(0,0,0,0.5); 
+        display: flex; flex-direction: column; align-items: center; justify-content: center; 
+        transition: all 0.1s; 
+    }
+    
+    .key:active, .key.pressed { 
+        transform: translateY(2px); 
+        box-shadow: 0 1px 2px rgba(0,0,0,0.5), inset 0 1px 3px rgba(0,0,0,0.4); 
+        background: linear-gradient(180deg, #c0c0c0 0%, #a0a0a0 100%);
+        border-top: 1px solid #888;
+    }
+
+    .key::before {
+        content: ''; width: 24px; height: 4px;
+        background-color: var(--btn-led-off);
+        border-radius: 2px; margin-bottom: 6px;
+        box-shadow: inset 0 1px 2px rgba(0,0,0,0.8);
+        border: 1px solid rgba(255,255,255,0.1);
+        transition: background-color 0.2s, box-shadow 0.2s;
+    }
+
+    .key.led-active::before, .key.pressed::before {
+        background-color: var(--btn-led-green);
+        box-shadow: 0 0 8px var(--btn-led-green);
+    }
+    
+    #btnPause.pressed::before { background-color: var(--btn-led-amber); box-shadow: 0 0 8px var(--btn-led-amber); }
+    #btnStop.pressed::before { background-color: var(--btn-led-off); box-shadow: none; } 
+    
+    .key-label { 
+        font-size: 13px; 
+        font-weight: 800; 
+        color: #333; 
+        margin-top: 2px; 
+        white-space:nowrap; 
+    }
+    .key-symbol { font-size: 18px; font-weight: bold; color: #222; margin-bottom: 0px; line-height: 1; }
 
     /* RIGHT SIDE CONTROLS */
     .right-controls-col { 
@@ -317,11 +615,24 @@
     }
     .button-groups-row { display: flex; gap: 20px; margin-top: 10px; align-items: center; }
     .tape-selectors, .playback-controls { display: flex; gap: 10px; background: #222; padding: 10px; border-radius: 4px; border: 1px solid #555; box-shadow: inset 0 0 5px #000; }
-    .selector-btn { width: 45px; height: 30px; background: linear-gradient(to bottom, #ddd 0%, #999 100%); border: 1px solid #555; border-radius: 2px; font-size: 10px; font-weight: bold; text-align: center; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.5); color: #222; transition: all 0.1s; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 4px 0; position: relative; }
+    
+    .selector-btn { 
+        width: 60px; 
+        height: 40px; 
+        background: linear-gradient(to bottom, #ddd 0%, #999 100%); 
+        border: 1px solid #555; border-radius: 2px; 
+        font-size: 13px; 
+        font-weight: bold; 
+        text-align: center; cursor: pointer; 
+        box-shadow: 0 2px 4px rgba(0,0,0,0.5); color: #222; 
+        transition: all 0.1s; 
+        display: flex; flex-direction: column; justify-content: space-between; align-items: center; 
+        padding: 4px 0; position: relative; 
+    }
     .selector-btn:active, .selector-btn.active { background: #555; color: #fff; box-shadow: inset 0 2px 5px rgba(0,0,0,0.9); transform: translateY(1px); border-color: #222; }
-    .selector-led { width: 14px; height: 5px; background: #333; border-radius: 1px; margin-bottom: 2px; box-shadow: inset 0 0 2px #000; transition: background 0.1s; }
+    .selector-led { width: 18px; height: 5px; background: #333; border-radius: 1px; margin-bottom: 2px; box-shadow: inset 0 0 2px #000; transition: background 0.1s; }
     .selector-btn.active .selector-led { background: var(--selector-led-on); box-shadow: 0 0 6px var(--selector-led-on); }
-    .neon-icon { width: 16px; height: 16px; fill: none; stroke: #333; stroke-width: 2; margin-bottom: 2px; filter: drop-shadow(0 0 0 transparent); transition: all 0.2s; }
+    .neon-icon { width: 18px; height: 18px; fill: none; stroke: #333; stroke-width: 2; margin-bottom: 2px; filter: drop-shadow(0 0 0 transparent); transition: all 0.2s; }
     .selector-btn.active .neon-icon { stroke: var(--selector-led-on); filter: drop-shadow(0 0 2px var(--selector-led-on)); }
 
     .power-group { display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 0 15px; padding-bottom: 5px; margin-left: auto; margin-right: 60px; }
@@ -343,10 +654,10 @@
     .knob-line { position: absolute; top: 8px; left: 50%; width: 5px; height: 28px; background: #222; transform: translateX(-50%); border-radius: 2px; z-index: 5; }
     .knob-text { font-size: 12px; font-weight: bold; color: #222; letter-spacing: 1px; z-index: 2; margin-top: 5px; }
 
-    /* === JEWEL CASE (WIDE + SELECTABLE TEXT) === */
+    /* === JEWEL CASE (RESIZED TO MATCH DECK HEIGHT) === */
     .jewel-case { 
         width: 544px; 
-        height: 680px; 
+        height: 720px; 
         background: transparent; border-radius: 4px; position: relative; 
         cursor: pointer; transform-style: preserve-3d; 
         transition: transform 0.8s cubic-bezier(0.4, 0.0, 0.2, 1); z-index: 20; 
@@ -359,8 +670,8 @@
     .inlay-art { position: absolute; top: 2px; left: 32px; right: 2px; bottom: 2px; background-color: #eee; background-size: cover; background-position: center; display: flex; justify-content: center; align-items: center; color: #888; font-weight: bold; text-align: center; padding: 20px; transition: background-image 0.5s ease-in-out; }
     .case-back { 
         transform: rotateY(180deg); display: flex; flex-direction: column; background: #fffcf5; 
-        cursor: auto; /* Show standard cursor for text */
-        user-select: text; /* ALLOW TEXT SELECTION */
+        cursor: auto; 
+        user-select: text; 
     }
     .case-spine-back { position: absolute; top: 0; right: 0; bottom: 0; width: 30px; background: #111; z-index: 5; border-left: 1px solid #555; }
     
@@ -391,19 +702,19 @@
     .track:hover { background: #222; color: #fff; }
     .track.active { color: orange; font-weight: bold; }
     
-    /* CREDIT FOOTER - POLISHED & SELECTABLE */
+    /* CREDIT FOOTER (UPDATED - BRIGHT WHITE) */
     .credit-footer {
         width: 100%;
         text-align: center;
         margin-top: 10px;
-        font-family: 'Segoe UI', Helvetica, Arial, sans-serif; /* Clean Sans-Serif */
+        font-family: 'Segoe UI', Helvetica, Arial, sans-serif; 
         font-size: 14px; 
-        color: #ffffff; 
+        color: #ffffff; /* Bright White */
         letter-spacing: 2px;
         text-transform: uppercase;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-        opacity: 0.8;
-        user-select: text; /* ALLOW TEXT SELECTION */
+        text-shadow: 0 0 5px rgba(255,255,255,0.5); /* Subtle Glow */
+        opacity: 1.0; /* Fully visible */
+        user-select: text; 
         cursor: text;
     }
 
@@ -415,6 +726,7 @@
     
     <div class="deck-wrapper-row">
         <div class="wood-case">
+
             <div class="foot left"></div><div class="foot right"></div>
             <div class="deck-body" id="deckBody">
                 <div class="screw tl"></div><div class="screw tr"></div>
@@ -427,11 +739,15 @@
 
                 <div class="counter-wrapper">
                     <div class="counter-group">
-                        <div class="counter-label">COUNTER</div>
-                        <div class="counter-digits" id="tapeCounter">00000</div>
-                        <div class="reset-button" id="btnReset" title="Reset"></div>
+                        <div class="counter-activity-led" id="counterActivityLed"></div>
+                        <div class="counter-window">
+                            <div class="counter-digits" id="tapeCounter">00000</div>
+                            <div class="reset-button" id="btnReset" title="Reset"></div>
+                        </div>
                     </div>
-                    <div class="time-digits" id="timeDisplay">00:00 / 00:00</div>
+                    <div class="time-group">
+                        <div class="time-digits" id="timeDisplay">00:00 / 00:00</div>
+                    </div>
                 </div>
 
                 <div class="top-panel">
@@ -478,10 +794,15 @@
                                 <div class="vu-label-text">RIGHT</div>
                             </div>
                         </div>
-                        <div class="vfd-container">
+                        
+                        <div class="vfd-container" id="vfdContainer" title="Click to Toggle LED Display">
                             <div class="channel-row"><div class="ch-label">L</div><div class="led-bar" id="ledRowL"></div></div>
                             <div class="channel-row"><div class="ch-label">R</div><div class="led-bar" id="ledRowR"></div></div>
                         </div>
+
+                        <div class="spectrum-container" id="spectrumAnalyzer" title="Click to Toggle Spectrum">
+                            </div>
+
                     </div>
 
                     <div class="door-frame">
@@ -511,8 +832,7 @@
                 </div>
 
                 <div class="control-deck">
-                    <div class="piano-keys">
-                        <div class="key key-rec"><div class="key-symbol">●</div><div class="key-label">REC</div></div>
+                    <div class="button-strip">
                         <div class="key" id="btnSeekBwd"><div class="key-symbol">⊲</div><div class="key-label">-5s</div></div>
                         <div class="key" id="btnRew"><div class="key-symbol">«</div><div class="key-label">REW</div></div>
                         <div class="key" id="btnPlay"><div class="key-symbol">▶</div><div class="key-label">PLAY</div></div>
@@ -577,6 +897,11 @@
                         <div class="power-btn-large" id="powerBtn"><div class="power-symbol"></div></div>
                         <div style="font-size:8px; font-weight:bold; color:#444;">POWER</div>
                     </div>
+                    
+                    <div class="help-icon" id="btnHelp" title="Open Manual">
+                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>
+                    </div>
+                    <div class="system-clock" id="sysClock">00:00</div>
                 </div>
             </div>
         </div>
@@ -599,9 +924,50 @@
     </div>
     
     <div class="credit-footer">
-        Dedicated to all Audiophiles. Designed & Developed by Chittaranjan Panda (babuptx [at] gmail)
+        | Dedicated to all Audiophiles | Designed & Developed by Babu | Feedback? Reach me at: babuptx @ gmail  |
     </div>
 
+</div>
+
+<div class="modal-overlay" id="helpModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span class="modal-title">OPERATING INSTRUCTIONS</span>
+            <span class="close-btn" id="btnCloseModal">&times;</span>
+        </div>
+        <div class="modal-body">
+            <h3>OBJECTIVE</h3>
+            <p>This player is a hybrid tribute to the golden age of Hi-Fi audio, specifically modeled after the legendary Technics RS-M250 Cassette Deck. It merges vintage aesthetics with modern Web Audio API technology to provide a high-fidelity visual and auditory experience right in your browser.</p>
+            
+            <h3>FEATURES & CONTROLS</h3>
+            <ul>
+                <li><strong>Transport Controls:</strong> Play, Pause, Stop, Fast Forward (Next Track), Rewind (Prev Track), and Precision Seek (+/- 5 seconds).</li>
+                <li><strong>Cassette Mechanism:</strong> Realistic tape reels that spin, stop, and change speed based on transport state. The tape supply grows and shrinks in real-time as the song plays.</li>
+                <li><strong>3D Jewel Case:</strong> Displays Album Art on the front and a dynamically generated Tracklist on the back. Click the case to flip it!</li>
+                <li><strong>Playlist Management:</strong> Click "EJECT" to load a local folder of music. Supported formats: MP3, WAV, FLAC, OGG, M4A.</li>
+                <li><strong>Loop & Shuffle:</strong> Toggle "LOOP" for Repeat All/One modes. Toggle "MIX" for random shuffle playback.</li>
+                <li><strong>Tape Selectors:</strong> Cosmetic switches (Norm/CrO2/Metal) that change the cassette label design instantly.</li>
+            </ul>
+
+            <h3>VISUALIZERS & AUDIO</h3>
+            <ul>
+                <li><strong>VU Meters:</strong> Dual-channel analog needles with warm backlight that bounces to the beat.</li>
+                <li><strong>LED Power Meters:</strong> Classic horizontal LED bars showing stereo output levels. (Click area to Toggle ON/OFF).</li>
+                <li><strong>Spectrum Analyzer:</strong> A 25-band Real-Time Analyzer (RTA) calibrated from 25Hz to 16kHz with "Peak Hold" falling tiles. (Click area to Toggle ON/OFF).</li>
+                <li><strong>Tone Control:</strong> Fully functional Bass and Treble knobs to shape your sound, plus a Master Volume knob.</li>
+            </ul>
+
+            <h3>CREDITS & CONTACT</h3>
+            <div class="contact-highlight">
+                Dedicated to all Audiophiles.<br>
+                Designed & Developed by Chittaranjan Panda (Babu)<br>
+                Email: babuptx @ gmail
+            </div>
+            <p style="margin-top:10px; font-size:12px; color:#666;">
+                *For the best experience, use a modern browser (Chrome/Edge/Firefox) on a desktop or tablet.
+            </p>
+        </div>
+    </div>
 </div>
 
 <div class="playlist-container">
@@ -626,7 +992,14 @@
     
     // New Logic Flags
     let isShuffle = false;
-    let loopMode = 'all'; // 'all' or 'one'
+    let loopMode = 'all'; 
+
+    // Peak Drop Variables (25 Bands)
+    const SPEC_BANDS = 25;
+    let peakLevels = new Array(SPEC_BANDS).fill(0);
+    let peakDelay = new Array(SPEC_BANDS).fill(0);
+    const PEAK_HOLD_TIME = 20; // frames
+    const PEAK_DROP_SPEED = 1.0; 
 
     const audio = document.getElementById('audioElement');
     const playlistDisplay = document.getElementById('playlistDisplay');
@@ -639,29 +1012,75 @@
     const tapeArtOverlay = document.getElementById('tapeArtOverlay');
     const tapeAlbumTitle = document.getElementById('tapeAlbumTitle');
     const powerBtn = document.getElementById('powerBtn');
+    const counterActivityLed = document.getElementById('counterActivityLed'); 
     
-    // Tape Reels
+    // Toggle Containers
+    const vfdContainer = document.getElementById('vfdContainer');
+    const specContainer = document.getElementById('spectrumAnalyzer');
+
+    // Modal
+    const btnHelp = document.getElementById('btnHelp');
+    const helpModal = document.getElementById('helpModal');
+    const btnCloseModal = document.getElementById('btnCloseModal');
+
     const tapeSupplyLeft = document.getElementById('tapeSupplyLeft');
     const tapeSupplyRight = document.getElementById('tapeSupplyRight');
-    
-    // Tape Label Elements
     const tapeLabelStrip = document.getElementById('tapeLabelStrip');
     const tapeLabelText = document.getElementById('tapeLabelText');
-    
     const jewelCase = document.getElementById('jewelCase');
     const inlayArt = document.getElementById('inlayArt');
     const albumTitleBack = document.getElementById('albumTitleBack');
     const tracklistBack = document.getElementById('tracklistBack');
     const caseBack = document.getElementById('caseBack');
 
-    // Smart Click Handler: Only flip if not selecting text
     jewelCase.addEventListener('click', (e) => {
         const selection = window.getSelection();
-        if (selection.toString().length > 0) return; // Don't flip if text selected
+        if (selection.toString().length > 0) return; 
         jewelCase.classList.toggle('flipped'); 
     });
 
-    // LED Setup: 46 LEDs (12 White + 34 Red)
+    // --- SYSTEM CLOCK ---
+    const sysClock = document.getElementById('sysClock');
+    function updateClock() {
+        const now = new Date();
+        const options = { 
+            hour: 'numeric', minute: '2-digit', hour12: true, 
+            weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' 
+        };
+        // e.g. "4:38 PM, Friday, 13 Feb 2026"
+        const timeStr = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+        const dayStr = now.toLocaleDateString('en-US', { weekday: 'long' });
+        const dateStr = now.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+        sysClock.textContent = `${timeStr}, ${dayStr}, ${dateStr}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // --- DISPLAY TOGGLE LOGIC ---
+    vfdContainer.addEventListener('click', () => {
+        playClickSound();
+        vfdContainer.classList.toggle('display-off');
+    });
+
+    specContainer.addEventListener('click', () => {
+        playClickSound();
+        specContainer.classList.toggle('display-off');
+    });
+
+    // --- MODAL LOGIC ---
+    btnHelp.addEventListener('click', () => {
+        helpModal.classList.add('show');
+    });
+    btnCloseModal.addEventListener('click', () => {
+        helpModal.classList.remove('show');
+    });
+    window.addEventListener('click', (e) => {
+        if(e.target === helpModal) {
+            helpModal.classList.remove('show');
+        }
+    });
+
+    // --- LED SETUP ---
     const LED_COUNT = 46; 
     function createLEDs(container) {
         for(let i=0; i<LED_COUNT; i++) {
@@ -678,6 +1097,83 @@
             if(i < count) row.children[i].classList.add('lit'); 
             else row.children[i].classList.remove('lit'); 
         } 
+    }
+
+    // --- 25-BAND SPECTRUM SETUP ---
+    const BAND_LABELS = [
+        "25","31","40","50","63","80","100","125","160","200",
+        "250","315","400","500","630","800","1k","1.2k","1.6k","2k",
+        "3k","5k","8k","12k","16k"
+    ];
+
+    function createSpectrum() {
+        for(let i=0; i<SPEC_BANDS; i++) {
+            const col = document.createElement('div'); 
+            col.className = 'spec-col';
+            
+            // 1. Peak Tile (Falling Dot)
+            const tile = document.createElement('div');
+            tile.className = 'peak-tile';
+            col.appendChild(tile);
+
+            // 2. Bar (Grow up)
+            const bar = document.createElement('div');
+            bar.className = 'spec-bar';
+            col.appendChild(bar);
+
+            // 3. Label (INSIDE BOTTOM)
+            const lbl = document.createElement('div');
+            lbl.className = 'spec-label';
+            lbl.textContent = BAND_LABELS[i] || "";
+            col.appendChild(lbl);
+            
+            specContainer.appendChild(col);
+        }
+    }
+    createSpectrum();
+
+    function updateSpectrum(dataArray) {
+        if(specContainer.classList.contains('display-off')) return; 
+        const cols = specContainer.children;
+        const binsPerBand = 3; 
+        
+        for(let i=0; i<SPEC_BANDS; i++) {
+            // Calculate Audio Level
+            let sum = 0;
+            for(let j=0; j<binsPerBand; j++) {
+                sum += dataArray[(i * binsPerBand) + j];
+            }
+            const avg = sum / binsPerBand;
+            const boost = 1 + (i * 0.1);
+            let pct = (avg * boost / 255) * 100;
+            if(pct > 100) pct = 100;
+
+            // DOM Elements
+            // Children: 0=Tile, 1=Bar, 2=Label
+            const tile = cols[i].children[0];
+            const bar = cols[i].children[1];
+
+            // Update Bar Height
+            bar.style.height = `${pct}%`;
+
+            // --- PEAK DROP LOGIC ---
+            if (pct >= peakLevels[i]) {
+                // New peak pushed up
+                peakLevels[i] = pct;
+                peakDelay[i] = PEAK_HOLD_TIME;
+            } else {
+                // Falling?
+                if (peakDelay[i] > 0) {
+                    peakDelay[i]--; // Hold
+                } else {
+                    peakLevels[i] -= PEAK_DROP_SPEED; // Drop
+                    if(peakLevels[i] < 0) peakLevels[i] = 0;
+                }
+            }
+            
+            // Update Tile Position (Bottom %)
+            tile.style.bottom = `${peakLevels[i]}%`; 
+        }
     }
 
     function playClickSound() {
@@ -712,13 +1208,10 @@
             tapeLabelStrip.style.background = 'var(--tape-green)';
             tapeLabelText.innerHTML = '<span>Maxell</span> <span>XLII IEC Type II 90</span>';
         } else {
-            // METAL: Orange Band, White Text, Specific Model Name
             tapeLabelStrip.style.background = 'var(--tape-orange)';
             tapeLabelText.innerHTML = '<span>TDK</span> <span style="color:#fff;">MA-R90 | Type IV Metal</span>';
         }
     }
-    
-    // Set Initial State
     updateTapeLabel('metal');
     
     selectors.forEach(btn => {
@@ -741,7 +1234,6 @@
     const iconLoopAll = document.getElementById('iconLoopAll');
     const iconLoopOne = document.getElementById('iconLoopOne');
 
-    // Helper: Fisher-Yates Shuffle
     function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -784,6 +1276,14 @@
     });
 
     // --- MAIN POWER LOGIC ---
+    function updateCounterLED() {
+        if(isPoweredOn && (isPlaying || deckBody.classList.contains('rewinding') || deckBody.classList.contains('fforwarding'))) {
+            counterActivityLed.classList.add('active');
+        } else {
+            counterActivityLed.classList.remove('active');
+        }
+    }
+
     powerBtn.addEventListener('click', () => {
         playClickSound(); isPoweredOn = !isPoweredOn;
         if(isPoweredOn) { deckBody.classList.add('powered-on'); } 
@@ -792,9 +1292,18 @@
             if(isPlaying) pressKey(btnStop);
             needleL.style.transform = `translateX(-50%) rotate(-45deg)`; needleR.style.transform = `translateX(-50%) rotate(-45deg)`;
             updateRow(document.getElementById('ledRowL'), 0); updateRow(document.getElementById('ledRowR'), 0);
+            
+            // Clear Spectrum
+            const cols = specContainer.children;
+            for(let c of cols) {
+                // Bar is child[1], Tile is child[0]
+                c.children[1].style.height = '0%';
+                peakLevels.fill(0); // Reset peaks
+            }
             document.querySelectorAll('.vu-backlight').forEach(el => el.style.opacity = 0);
             timeDisplay.textContent = "00:00 / 00:00";
         }
+        updateCounterLED();
     });
 
     function initAudio() {
@@ -807,14 +1316,13 @@
         splitter = audioCtx.createChannelSplitter(2); 
         analyserL = audioCtx.createAnalyser(); analyserR = audioCtx.createAnalyser();
         analyserL.fftSize = 256; analyserR.fftSize = 256;
-        analyserL.smoothingTimeConstant = 0.8; analyserR.smoothingTimeConstant = 0.8;
+        analyserL.smoothingTimeConstant = 0.5; analyserR.smoothingTimeConstant = 0.5;
         source.connect(bassNode); bassNode.connect(trebleNode); trebleNode.connect(gainNode);
         gainNode.connect(splitter); splitter.connect(analyserL, 0); splitter.connect(analyserR, 1);
         gainNode.connect(audioCtx.destination);
         isCtxInit = true;
     }
 
-    // Helper to format seconds to MM:SS
     function formatTime(s) {
         if (isNaN(s)) return "00:00";
         const m = Math.floor(s / 60);
@@ -822,7 +1330,6 @@
         return `${m.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     }
 
-    // Helper to extract duration for playlist without playing
     function getFileDuration(file) {
         return new Promise((resolve) => {
             const objectUrl = URL.createObjectURL(file);
@@ -879,7 +1386,6 @@
             }
             
             renderPlaylistWithDurations(listItems);
-            
             currentTrackIndex = 0;
             loadTrack(0);
         }
@@ -951,7 +1457,7 @@
         if(!isPoweredOn && key !== btnStop) return;
         document.querySelectorAll('.key').forEach(k => {
             k.classList.remove('pressed');
-            k.classList.remove('led-active'); // Clear LED
+            k.classList.remove('led-active'); 
         });
         if(key) {
             key.classList.add('pressed');
@@ -962,7 +1468,7 @@
             if(!isPoweredOn) return;
             initAudio(); if(audioCtx.state === 'suspended') audioCtx.resume();
             audio.play(); isPlaying = true;
-            key.classList.add('led-active'); // Ensure LED is on
+            key.classList.add('led-active'); 
             deckBody.classList.remove('rewinding', 'fforwarding');
             deckBody.classList.add('playing');
         } else if (key === btnPause) {
@@ -974,6 +1480,7 @@
             deckBody.classList.remove('playing', 'rewinding', 'fforwarding');
             key.classList.remove('pressed'); 
         }
+        updateCounterLED();
     }
 
     btnPlay.addEventListener('click', () => pressKey(btnPlay));
@@ -983,8 +1490,10 @@
     btnRew.addEventListener('click', () => {
         if(!isPoweredOn) return;
         btnRew.classList.add('pressed'); deckBody.classList.add('rewinding');
+        updateCounterLED(); // Active during rewind
         setTimeout(() => { 
             btnRew.classList.remove('pressed'); deckBody.classList.remove('rewinding');
+            updateCounterLED(); // Check state (likely off or play)
             let prevIndex;
             if (isShuffle) {
                 let shufflePos = shuffledPlaylist.indexOf(currentTrackIndex);
@@ -1000,8 +1509,10 @@
     btnFF.addEventListener('click', () => {
         if(!isPoweredOn) return;
         btnFF.classList.add('pressed'); deckBody.classList.add('fforwarding');
+        updateCounterLED(); // Active during FF
         setTimeout(() => { 
             btnFF.classList.remove('pressed'); deckBody.classList.remove('fforwarding');
+            updateCounterLED();
             playNextTrack();
         }, 300);
     });
@@ -1018,14 +1529,13 @@
         loadTrack(nextIndex); if(isPlaying) pressKey(btnPlay);
     }
     
-    // NEW SEEK KEYS
     btnSeekBwd.addEventListener('click', () => {
         if(!isPoweredOn) return;
         btnSeekBwd.classList.add('pressed');
         audio.currentTime = Math.max(0, audio.currentTime - 5);
         setTimeout(() => { 
             btnSeekBwd.classList.remove('pressed');
-            if(isPlaying) btnPlay.classList.add('pressed', 'led-active'); // Keep play lit
+            if(isPlaying) btnPlay.classList.add('pressed', 'led-active'); 
         }, 200);
     });
 
@@ -1035,7 +1545,7 @@
         audio.currentTime = Math.min(audio.duration, audio.currentTime + 5);
         setTimeout(() => { 
             btnSeekFwd.classList.remove('pressed');
-            if(isPlaying) btnPlay.classList.add('pressed', 'led-active'); // Keep play lit
+            if(isPlaying) btnPlay.classList.add('pressed', 'led-active'); 
         }, 200);
     });
 
@@ -1057,13 +1567,22 @@
             const timeVal = Math.floor(audio.currentTime * 10);
             tapeCounter.textContent = timeVal.toString().padStart(5, '0');
             
-            // Update Time Display
-            const cur = formatTime(audio.currentTime);
-            const rem = formatTime(audio.duration - audio.currentTime);
-            timeDisplay.textContent = `${cur} / ${rem}`;
+            // ELAPSED
+            const curM = Math.floor(audio.currentTime / 60);
+            const curS = Math.floor(audio.currentTime % 60);
+            const curStr = `${curM.toString().padStart(2, '0')}:${curS.toString().padStart(2, '0')}`;
+
+            // REMAINING
+            let remSeconds = 0;
+            if(audio.duration && !isNaN(audio.duration)) {
+                 remSeconds = Math.max(0, audio.duration - audio.currentTime);
+            }
+            const remM = Math.floor(remSeconds / 60);
+            const remS = Math.floor(remSeconds % 60);
+            const remStr = `${remM.toString().padStart(2, '0')}:${remS.toString().padStart(2, '0')}`;
+
+            timeDisplay.textContent = `${curStr} / ${remStr}`;
             
-            // TAPE REEL PHYSICS (Grow/Shrink)
-            // SCALE: Min 74px, Max 100px (approx 35% larger than original 55/75)
             const pct = audio.currentTime / audio.duration;
             const leftSize = 100 - (26 * pct);
             const rightSize = 74 + (26 * pct);
@@ -1088,7 +1607,7 @@
     function resetCounter() { tapeCounter.textContent = "00000"; }
 
     function drawVU() {
-        if(isCtxInit && isPlaying && isPoweredOn) {
+        if(isCtxInit && isPoweredOn) {
             const dL = new Uint8Array(analyserL.frequencyBinCount);
             const dR = new Uint8Array(analyserR.frequencyBinCount);
             analyserL.getByteFrequencyData(dL); analyserR.getByteFrequencyData(dR);
@@ -1096,7 +1615,6 @@
             for(let i=0; i<dL.length; i++) { vL+=dL[i]; vR+=dR[i]; }
             vL = vL/dL.length; vR = vR/dR.length;
 
-            // Amber Flicker Logic
             const brightness = 0.5 + (vL / 255) * 0.4; 
             document.querySelectorAll('.vu-backlight').forEach(el => el.style.opacity = brightness);
 
@@ -1108,6 +1626,11 @@
             const mapLED = (v) => Math.min(Math.floor((v/220)*LED_COUNT), LED_COUNT);
             updateRow(document.getElementById('ledRowL'), mapLED(vL));
             updateRow(document.getElementById('ledRowR'), mapLED(vR));
+            
+            const mixed = new Uint8Array(dL.length);
+            for(let i=0; i<dL.length; i++) mixed[i] = (dL[i] + dR[i]) / 2;
+            updateSpectrum(mixed);
+
         } else {
             needleL.style.transform = `translateX(-50%) rotate(-45deg)`;
             needleR.style.transform = `translateX(-50%) rotate(-45deg)`;
