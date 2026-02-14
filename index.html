@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Technics RS-M250 Hybrid (V5.7 - Readable Clock)</title>
+<title>Technics RS-M250 Hybrid (V5.17 - Footer Text Update)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -107,24 +107,6 @@
     .wood-case::before { content:''; position:absolute; top:0; left:0; width:15px; height:100%; background:rgba(0,0,0,0.2); }
     .wood-case::after { content:''; position:absolute; top:0; right:0; width:15px; height:100%; background:rgba(0,0,0,0.2); }
 
-    /* SYSTEM CLOCK (High Contrast Window) */
-    .system-clock {
-        position: absolute;
-        top: 20px;
-        right: 40px;
-        font-family: var(--digital-font);
-        font-size: 14px;
-        color: #00ffff; /* Bright Cyan */
-        background-color: #111; /* Dark Background for readability */
-        padding: 6px 12px;
-        border: 2px solid #555;
-        border-radius: 4px;
-        box-shadow: inset 0 0 5px #000, 0 1px 2px rgba(255,255,255,0.5);
-        text-shadow: 0 0 5px rgba(0, 255, 255, 0.6);
-        z-index: 100;
-        letter-spacing: 1px;
-    }
-
     /* HELP ICON */
     .help-icon {
         width: 32px;
@@ -194,6 +176,39 @@
         background: #e0e0e0; padding: 15px; margin-top: 20px; border-left: 4px solid #00ffff; font-weight: bold;
     }
 
+    /* --- PRIVACY MODAL (The Interceptor) --- */
+    .privacy-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.9);
+        z-index: 2000; /* Higher than everything else */
+        display: none; 
+        justify-content: center; align-items: center;
+        opacity: 0; transition: opacity 0.3s ease;
+    }
+    .privacy-overlay.show { display: flex; opacity: 1; }
+
+    .privacy-box {
+        width: 500px; background: #222; border: 2px solid #00ffff;
+        border-radius: 4px; padding: 30px; 
+        color: #fff; font-family: 'Arial', sans-serif;
+        box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+        text-align: center;
+    }
+
+    .privacy-title { font-size: 20px; font-weight: bold; margin-bottom: 15px; color: #00ffff; text-transform: uppercase; letter-spacing: 1px; }
+    .privacy-text { font-size: 14px; line-height: 1.6; color: #ccc; margin-bottom: 25px; text-align: left; }
+    .privacy-btn { 
+        background: #00ffff; color: #000; border: none; padding: 12px 25px; 
+        font-weight: bold; cursor: pointer; border-radius: 2px; font-size: 14px;
+        transition: all 0.2s; letter-spacing: 1px; text-transform: uppercase;
+    }
+    .privacy-btn:hover { background: #fff; box-shadow: 0 0 15px #fff; }
+    .privacy-cancel { 
+        background: transparent; border: 1px solid #555; color: #888; 
+        padding: 10px 20px; margin-left: 15px; cursor: pointer; border-radius: 2px; font-size: 13px; text-transform: uppercase;
+    }
+    .privacy-cancel:hover { color: #fff; border-color: #fff; }
+
     .foot { position: absolute; bottom: -15px; width: 60px; height: 20px; background: linear-gradient(to right, #333, #999, #333); border-radius: 0 0 10px 10px; box-shadow: 0 5px 10px rgba(0,0,0,0.8); }
     .foot.left { left: 40px; } .foot.right { right: 40px; }
 
@@ -216,12 +231,14 @@
     .logo { font-family: 'Helvetica', sans-serif; font-weight: 900; font-size: 32px; text-transform: uppercase; color: #111; letter-spacing: -1px; text-shadow: 0 1px 0 rgba(255,255,255,0.5); }
     .model { font-size: 12px; font-weight: bold; color: #555; letter-spacing: 2px; margin-top: 2px; font-family: 'Brush Script MT', cursive; font-style: italic;}
 
-    /* === VINTAGE DIGITAL COUNTER === */
+    /* === VINTAGE DIGITAL COUNTER (REDUCED SIZE - 30%) === */
     .counter-wrapper { 
-        position: absolute; top: 35px; right: 480px; 
-        display: flex; align-items: flex-end; gap: 25px; 
+        position: absolute; 
+        top: 25px; /* Moved up to clear VU meters */
+        right: 480px; 
+        display: flex; align-items: flex-end; gap: 15px; 
         background: #181818; 
-        padding: 8px 25px; 
+        padding: 5px 15px; 
         border: 2px solid #666; 
         border-bottom: 2px solid #444;
         border-radius: 4px; 
@@ -229,11 +246,11 @@
         z-index: 20;
     }
 
-    .counter-group { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+    .counter-group { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
     
     .counter-activity-led {
-        width: 14px; 
-        height: 5px; 
+        width: 10px; 
+        height: 4px; 
         background: var(--counter-led-pale); 
         border-radius: 1px; 
         box-shadow: inset 0 0 2px #000; 
@@ -242,23 +259,23 @@
     }
     .deck-body.powered-on .counter-activity-led.active {
         background: var(--counter-led-active);
-        box-shadow: 0 0 8px var(--counter-led-active);
+        box-shadow: 0 0 6px var(--counter-led-active);
     }
     
     .counter-window {
         background: #000;
-        padding: 4px 10px;
+        padding: 3px 8px;
         border-radius: 2px;
         box-shadow: inset 0 0 5px rgba(0,0,0,0.8);
         border: 1px solid #333;
         display: flex;
         align-items: center;
-        gap: 15px;
+        gap: 10px;
     }
 
     .counter-digits, .time-digits { 
         font-family: var(--digital-font);
-        font-size: 32px; 
+        font-size: 22px; /* Reduced from 32px */
         color: #444; 
         letter-spacing: 2px; 
         line-height: 1;
@@ -270,20 +287,20 @@
     .deck-body.powered-on .counter-digits,
     .deck-body.powered-on .time-digits {
         color: #ffffff;
-        text-shadow: 0 0 1px rgba(255,255,255,0.8), 0 0 4px rgba(255,255,255,0.4);
+        text-shadow: 0 0 1px rgba(255,255,255,0.8), 0 0 3px rgba(255,255,255,0.4);
     }
     
     .reset-button { 
-        width: 12px; height: 12px; background: #999; border-radius: 50%; cursor: pointer; 
+        width: 10px; height: 10px; background: #999; border-radius: 50%; cursor: pointer; 
         border: 1px solid #ccc; box-shadow: 0 2px 2px rgba(0,0,0,0.5);
     }
     .reset-button:active { transform: scale(0.9); background: #777; }
 
     .time-group { 
         display: flex; flex-direction: column; justify-content: flex-end;
-        border-left: 2px solid #333; padding-left: 20px; 
+        border-left: 2px solid #333; padding-left: 15px; 
         height: 100%;
-        padding-bottom: 4px; 
+        padding-bottom: 3px; 
     }
 
     /* Screws */
@@ -548,6 +565,7 @@
     .ts-left { width: 100px; height: 100px; top: -9.5px; left: -9.5px; }
     .ts-right { width: 75px; height: 75px; top: 3px; left: 3px; }
 
+    /* --- ANIMATIONS RESTORED --- */
     .playing .reel-hub, .playing .tape-supply { animation: spin 1.8s linear infinite; }
     .rewinding .reel-hub, .rewinding .tape-supply { animation: spin 0.2s linear infinite reverse; }
     .fforwarding .reel-hub, .fforwarding .tape-supply { animation: spin 0.2s linear infinite; }
@@ -636,7 +654,18 @@
     .selector-btn.active .neon-icon { stroke: var(--selector-led-on); filter: drop-shadow(0 0 2px var(--selector-led-on)); }
 
     .power-group { display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 0 15px; padding-bottom: 5px; margin-left: auto; margin-right: 60px; }
-    .power-btn-large { width: 65px; height: 65px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #fdfdfd 0%, #dcdcdc 50%, #b0b0b0 100%); border: 2px solid #fff; box-shadow: 0 4px 8px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.9); display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.3s; }
+    .power-btn-large { 
+        width: 65px; height: 65px; 
+        border-radius: 50%; 
+        background: radial-gradient(circle at 30% 30%, #fdfdfd 0%, #dcdcdc 50%, #b0b0b0 100%); 
+        border: 2px solid #fff; 
+        box-shadow: 0 4px 8px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.9); 
+        display: flex; justify-content: center; align-items: center; 
+        cursor: pointer; 
+        transition: all 0.3s;
+        z-index: 100; /* Ensuring clickability */
+        position: relative;
+    }
     .power-btn-large:active { transform: scale(0.95); }
     .power-symbol { width: 24px; height: 24px; border: 4px solid var(--power-off); border-radius: 50%; border-top-color: transparent; position: relative; transition: all 0.5s; }
     .power-symbol::after { content: ''; position: absolute; top: -6px; left: 50%; transform: translateX(-50%); width: 5px; height: 12px; background: var(--power-off); transition: all 0.5s; }
@@ -702,18 +731,18 @@
     .track:hover { background: #222; color: #fff; }
     .track.active { color: orange; font-weight: bold; }
     
-    /* CREDIT FOOTER (UPDATED - BRIGHT WHITE) */
+    /* CREDIT FOOTER (UPDATED - DULL NEON BLUE) */
     .credit-footer {
         width: 100%;
         text-align: center;
         margin-top: 10px;
         font-family: 'Segoe UI', Helvetica, Arial, sans-serif; 
         font-size: 14px; 
-        color: #ffffff; /* Bright White */
+        color: #4da6ff; /* Dull Neon Blue */
         letter-spacing: 2px;
         text-transform: uppercase;
-        text-shadow: 0 0 5px rgba(255,255,255,0.5); /* Subtle Glow */
-        opacity: 1.0; /* Fully visible */
+        text-shadow: 0 0 5px rgba(77, 166, 255, 0.3); /* Subtle Glow */
+        opacity: 1.0; 
         user-select: text; 
         cursor: text;
     }
@@ -840,10 +869,11 @@
                         <div class="key" id="btnSeekFwd"><div class="key-symbol">⊳</div><div class="key-label">+5s</div></div>
                         <div class="key" id="btnStop"><div class="key-symbol">■</div><div class="key-label">STOP</div></div>
                         <div class="key" id="btnPause"><div class="key-symbol">II</div><div class="key-label">PAUSE</div></div>
-                        <label class="key">
+                        
+                        <div class="key" id="btnEject">
                             <div class="key-symbol">⏏</div><div class="key-label">EJECT</div>
-                            <input type="file" id="folderInput" webkitdirectory directory multiple accept="audio/*, .mp3, .wav, .flac, .ogg, .m4a, image/*">
-                        </label>
+                        </div>
+                        <input type="file" id="folderInput" webkitdirectory directory multiple accept="audio/*, .mp3, .wav, .flac, .ogg, .m4a, image/*">
                     </div>
                     
                     <div class="right-controls-col">
@@ -898,10 +928,9 @@
                         <div style="font-size:8px; font-weight:bold; color:#444;">POWER</div>
                     </div>
                     
-                    <div class="help-icon" id="btnHelp" title="Open Manual">
+                    <div class="help-icon" id="btnHelp" title="Help / Manual">
                         <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>
                     </div>
-                    <div class="system-clock" id="sysClock">00:00</div>
                 </div>
             </div>
         </div>
@@ -924,7 +953,7 @@
     </div>
     
     <div class="credit-footer">
-        | Dedicated to all Audiophiles | Designed & Developed by Babu | Feedback? Reach me at: babuptx @ gmail  |
+        | Designed & Developed by an Audiophile like you (Babu)⚙️ I'd love to hear from you. Send feedbacks and suggestions 📧 babuptx@gmail.com   | <span id="sysClock"></span>
     </div>
 
 </div>
@@ -963,10 +992,28 @@
                 Designed & Developed by Chittaranjan Panda (Babu)<br>
                 Email: babuptx @ gmail
             </div>
+            
+            <h3>LEGAL NOTICE</h3>
+            <p style="font-size:13px; color:#444;"><strong>LEGAL DISCLAIMER:</strong> This application is a local media player designed for users to enjoy their own legally acquired music libraries. The author strongly endorses the support of artists and the music industry through the use of legal media. Please enjoy music responsibly.</p>
+
             <p style="margin-top:10px; font-size:12px; color:#666;">
                 *For the best experience, use a modern browser (Chrome/Edge/Firefox) on a desktop or tablet.
             </p>
         </div>
+    </div>
+</div>
+
+<div class="privacy-overlay" id="privacyModal">
+    <div class="privacy-box">
+        <div class="privacy-title">LOCAL LIBRARY ACCESS</div>
+        <div class="privacy-text">
+            To play your music, this app requires read-access to your local folder.<br>
+            Your browser displays a standard security warning asking to "Upload" files. This is generic terminology for granting permission to read files.
+            <br><br>
+            This application operates entirely on your browser client-side. Your files are loaded directly into the browser's local memory for playback and <strong>never leave your device</strong>.
+        </div>
+        <button class="privacy-btn" id="btnConfirmLoad">SELECT FOLDER</button>
+        <button class="privacy-cancel" id="btnCancelLoad">CANCEL</button>
     </div>
 </div>
 
@@ -1039,19 +1086,23 @@
         jewelCase.classList.toggle('flipped'); 
     });
 
-    // --- SYSTEM CLOCK ---
+    // --- SYSTEM CLOCK (MOVED TO FOOTER) ---
     const sysClock = document.getElementById('sysClock');
     function updateClock() {
         const now = new Date();
-        const options = { 
-            hour: 'numeric', minute: '2-digit', hour12: true, 
-            weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' 
-        };
-        // e.g. "4:38 PM, Friday, 13 Feb 2026"
-        const timeStr = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+        // Added second: '2-digit' for h:mm:ss format
+        const timeStr = now.toLocaleTimeString('en-US', { 
+            hour: 'numeric', 
+            minute: '2-digit', 
+            second: '2-digit', 
+            hour12: true 
+        });
         const dayStr = now.toLocaleDateString('en-US', { weekday: 'long' });
         const dateStr = now.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
-        sysClock.textContent = `${timeStr}, ${dayStr}, ${dateStr}`;
+        
+        if(sysClock) {
+            sysClock.textContent = `${timeStr}, ${dayStr}, ${dateStr}`;
+        }
     }
     setInterval(updateClock, 1000);
     updateClock();
@@ -1077,6 +1128,47 @@
     window.addEventListener('click', (e) => {
         if(e.target === helpModal) {
             helpModal.classList.remove('show');
+        }
+    });
+    
+    // --- PRIVACY INTERCEPTOR LOGIC ---
+    const btnEject = document.getElementById('btnEject');
+    const privacyModal = document.getElementById('privacyModal');
+    const btnConfirmLoad = document.getElementById('btnConfirmLoad');
+    const btnCancelLoad = document.getElementById('btnCancelLoad');
+    
+    // 1. User clicks visual EJECT button -> Show Custom Privacy Modal
+    btnEject.addEventListener('click', () => {
+        if(!isPoweredOn) return; // Optional: only allow eject if power is on
+        pressKey(null); // Clear other keys
+        btnEject.classList.add('pressed');
+        playClickSound(); 
+        
+        // Show the assurance modal
+        privacyModal.classList.add('show');
+    });
+
+    // 2. User confirms they understand -> Trigger the real hidden input
+    btnConfirmLoad.addEventListener('click', () => {
+        playSwitchSound();
+        privacyModal.classList.remove('show');
+        btnEject.classList.remove('pressed');
+        
+        // Trigger the browser popup NOW, after explanation
+        folderInput.click();
+    });
+
+    // 3. User cancels
+    btnCancelLoad.addEventListener('click', () => {
+        privacyModal.classList.remove('show');
+        btnEject.classList.remove('pressed');
+    });
+
+    // 4. Close modal if clicking outside box
+    privacyModal.addEventListener('click', (e) => {
+        if(e.target === privacyModal) {
+            privacyModal.classList.remove('show');
+            btnEject.classList.remove('pressed');
         }
     });
 
@@ -1456,8 +1548,11 @@
     function pressKey(key) {
         if(!isPoweredOn && key !== btnStop) return;
         document.querySelectorAll('.key').forEach(k => {
-            k.classList.remove('pressed');
-            k.classList.remove('led-active'); 
+            let isEject = (k.id === 'btnEject');
+            if(!isEject) {
+                k.classList.remove('pressed');
+                k.classList.remove('led-active'); 
+            }
         });
         if(key) {
             key.classList.add('pressed');
