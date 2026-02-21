@@ -82,10 +82,8 @@
         flex-direction: column;
         align-items: center;
         gap: 30px;
-        transform: scale(0.85); 
         transform-origin: top center;
         perspective: 1200px;
-        margin-bottom: -60px; 
         position: relative;
         z-index: 10;
     }
@@ -722,8 +720,8 @@
     input[type="file"] { display: none; }
 
     /* PLAYLIST (Ducked) */
-    .playlist-container { 
-        width: 1400px; margin-top: -10px; background: #151515; border: 2px solid #333; padding: 10px; border-radius: 4px; box-sizing: border-box; transform: scale(0.85); transform-origin: top center; position: relative; z-index: 5; 
+    .playlist-container {
+        width: 100%; margin-top: -10px; background: #151515; border: 2px solid #333; padding: 10px; border-radius: 4px; box-sizing: border-box; position: relative; z-index: 5;
     }
     .playlist-header { color: #888; font-size: 12px; font-weight: bold; margin-bottom: 5px; letter-spacing: 1px; }
     .playlist-display { height: 140px; overflow-y: auto; font-family: monospace; color: #aaa; font-size: 14px; }
@@ -745,6 +743,31 @@
         opacity: 1.0; 
         user-select: text; 
         cursor: text;
+    }
+
+    /* --- RESPONSIVE: Stacked layout for narrow screens --- */
+    @media (max-width: 1200px) {
+        .deck-wrapper-row {
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+        .jewel-case {
+            width: 500px;
+            height: 400px;
+        }
+    }
+
+    /* --- ACCESSIBILITY: Respect reduced-motion preference --- */
+    @media (prefers-reduced-motion: reduce) {
+        .playing .reel-hub, .playing .tape-supply,
+        .rewinding .reel-hub, .rewinding .tape-supply,
+        .fforwarding .reel-hub, .fforwarding .tape-supply {
+            animation: none;
+        }
+        .vu-needle {
+            transition: none;
+        }
     }
 
 </style>
@@ -1745,18 +1768,19 @@
 
     function setupKnob(element, type) {
         let isDragging = false, startY = 0;
-        element.addEventListener('mousedown', (e) => { isDragging=true; startY=e.clientY; });
-        window.addEventListener('mousemove', (e) => {
+
+        function onStart(y) { isDragging = true; startY = y; }
+        function onMove(y) {
             if(!isDragging) return;
-            let d = (startY - e.clientY);
-            
+            let d = (startY - y);
+
             if(type === 'vol') {
                 let v = volume + (d*0.01);
                 if(v > 1) v=1; if(v < 0) v=0;
                 volume = v;
                 if(gainNode) gainNode.gain.value = volume;
                 element.style.transform = `rotate(${(volume * 270) - 135}deg)`;
-            } 
+            }
             else if(type === 'bass' || type === 'treble') {
                 let val = (type === 'bass' ? bassVal : trebleVal) + (d*0.1);
                 if(val > 10) val=10; if(val < -10) val=-10;
@@ -1764,14 +1788,57 @@
                 else { trebleVal = val; if(trebleNode) trebleNode.gain.value = trebleVal; }
                 element.style.transform = `rotate(${val * 13.5}deg)`;
             }
-            startY = e.clientY;
-        });
-        window.addEventListener('mouseup', () => isDragging=false);
+            startY = y;
+        }
+        function onEnd() { isDragging = false; }
+
+        // Mouse events
+        element.addEventListener('mousedown', (e) => onStart(e.clientY));
+        window.addEventListener('mousemove', (e) => onMove(e.clientY));
+        window.addEventListener('mouseup', onEnd);
+
+        // Touch events
+        element.addEventListener('touchstart', (e) => { e.preventDefault(); onStart(e.touches[0].clientY); }, { passive: false });
+        window.addEventListener('touchmove', (e) => { if(isDragging) { e.preventDefault(); onMove(e.touches[0].clientY); } }, { passive: false });
+        window.addEventListener('touchend', onEnd);
     }
 
     setupKnob(document.getElementById('knobVolume'), 'vol');
     setupKnob(document.getElementById('knobBass'), 'bass');
     setupKnob(document.getElementById('knobTreble'), 'treble');
+
+    // --- DYNAMIC VIEWPORT SCALING ---
+    const NATURAL_WIDTH = 2200;
+    const NATURAL_HEIGHT = 1050;
+    const sceneContainer = document.querySelector('.scene-container');
+
+    function fitToScreen() {
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const scaleX = vw / NATURAL_WIDTH;
+        const scaleY = vh / NATURAL_HEIGHT;
+        const scale = Math.min(scaleX, scaleY, 1.0); // never upscale beyond 1.0
+
+        sceneContainer.style.transform = `scale(${scale})`;
+        // Collapse the visual gap left by scaling down
+        const naturalHeight = sceneContainer.scrollHeight;
+        const scaledHeight = naturalHeight * scale;
+        const gap = naturalHeight - scaledHeight;
+        sceneContainer.style.marginBottom = `-${gap}px`;
+    }
+
+    // Debounced resize handler
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(fitToScreen, 100);
+    });
+    window.addEventListener('orientationchange', () => {
+        setTimeout(fitToScreen, 200);
+    });
+
+    // Initial fit
+    fitToScreen();
 
 </script>
 </body>
