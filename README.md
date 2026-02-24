@@ -1,23 +1,4 @@
 # Technics RS-M250 Hybrid 📼
-Technics RS-M250 Hybrid 📼
-
-A high-fidelity, skeuomorphic web-based cassette deck simulator that bridges vintage analog aesthetics with modern digital audio playback. This project is a tribute to the legendary Technics RS-M250, utilizing the Web Audio API to provide an interactive Hi-Fi experience directly in your browser.
-
-## 🔗 Live Demo
-🚀 Launch the Live Demo [**Launch the Cassette Deck**](https://babuptx.github.io/technics-rs-m250/)
-
-
-🤝 Credits & Contacts:
-Designed & Developed by an Audiophile like you (Chittaranjan Panda - Babu)
-
-
-⚙️ Feedback & Support: Have questions or suggestions? I'd love to hear from you. 📧 babuptx@gmail.com
-
-
-
-
-
-# Technics RS-M250 Hybrid 📼
 
 A high-fidelity, skeuomorphic web-based cassette deck simulator that bridges vintage analog aesthetics with modern digital audio playback. This project is a tribute to the legendary Technics RS-M250, utilizing the Web Audio API to provide an interactive Hi-Fi experience directly in your browser.
 
